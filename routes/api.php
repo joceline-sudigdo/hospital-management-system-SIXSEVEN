@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Http\Request;
+use App\Http\Controllers\API\FileController;
 
 
 
@@ -154,3 +155,9 @@ Route::middleware('auth:sanctum')
     }
 
 )->name('verification.send');
+
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
+    Route::post('files/upload',  [FileController::class, 'upload']);
+    Route::get('files/{id}',     [FileController::class, 'show']);
+    Route::delete('files/{id}',  [FileController::class, 'destroy']);
+});
