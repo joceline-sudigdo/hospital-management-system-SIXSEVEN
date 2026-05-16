@@ -5,31 +5,50 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 
 /**
- * DatabaseSeeder
+ * DatabaseSeeder — Master Seeder
  *
- * File ini adalah "induk" dari semua seeder.
- * Jalankan SEMUA seeder sekaligus dengan:
+ * Jalankan semua seeder sekaligus:
  *   php artisan db:seed
  *
- * URUTAN SANGAT PENTING karena ada relasi foreign key:
- *   User → Doctor/Patient → Schedule → Appointment → MedicalRecord
+ * Fresh start (hapus semua data lalu seed ulang):
+ *   php artisan migrate:fresh --seed
  *
- * Kalau urutannya salah → error "foreign key constraint fails"
+ * ⚠️  URUTAN INI PENTING — jangan diubah!
+ *
+ *   users ──► doctors ──► schedules ──┐
+ *         └──► patients ──────────────┤
+ *                                     ▼
+ *                               appointments
+ *                                     │
+ *                                     ▼
+ *                              medical_records
  */
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->command->info('🚀 Memulai seeding database...');
+        $this->command->info('');
+        $this->command->info('╔══════════════════════════════════════════╗');
+        $this->command->info('║   🏥 Hospital Management System Seeder   ║');
+        $this->command->info('╚══════════════════════════════════════════╝');
+        $this->command->info('');
 
         $this->call([
-            UserSeeder::class,        // 1️⃣ Buat users dulu (admin, dokter, pasien)
-            DoctorSeeder::class,      // 2️⃣ Buat profil dokter (butuh user_id)
-            PatientSeeder::class,     // 3️⃣ Buat profil pasien (butuh user_id)
-            ScheduleSeeder::class,    // 4️⃣ Buat jadwal dokter (butuh doctor_id)
-            AppointmentSeeder::class, // 5️⃣ Buat janji temu + rekam medis (butuh semua di atas)
+            UserSeeder::class,          // Step 1: users (admin, 10 dokter, 50 pasien)
+            DoctorSeeder::class,        // Step 2: profil dokter -> butuh user_id
+            PatientSeeder::class,       // Step 3: profil pasien -> butuh user_id
+            ScheduleSeeder::class,      // Step 4: jadwal dokter -> butuh doctor_id
+            AppointmentSeeder::class,   // Step 5: janji temu   -> butuh semua di atas
+            MedicalRecordSeeder::class, // Step 6: rekam medis  -> butuh appointment_id
         ]);
 
-        $this->command->info('🎉 Semua seeder selesai!');
+        $this->command->info('');
+        $this->command->info('Seeding selesai! Summary:');
+        $this->command->info('   - 1 Admin, 10 Dokter, 50 Pasien');
+        $this->command->info('   - ±30 Jadwal praktek');
+        $this->command->info('   - 200 Appointments');
+        $this->command->info('   - 100 Rekam Medis');
+        $this->command->info('');
+        $this->command->info('Login Admin: admin@kliniksehat.id / password');
     }
 }

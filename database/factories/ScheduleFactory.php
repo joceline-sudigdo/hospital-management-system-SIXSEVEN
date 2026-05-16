@@ -32,7 +32,9 @@ class ScheduleFactory extends Factory
 
         return [
             'doctor_id'   => Doctor::factory(),    // buat dokter baru kalau tidak diberikan
-            'day_of_week' => $faker->numberBetween(0, 6), // 0=Senin, 6=Minggu
+            'day_of_week' => $faker->randomElement([
+            'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
+            ]),
             'start_time'  => $startTime,
             'end_time'    => $endTime,
         ];

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Schedule extends Model
 {
     use HasFactory;
-
+    public $timestamps = false;
     protected $fillable = [
         'doctor_id', 'day_of_week', 'start_time', 'end_time',
     ];

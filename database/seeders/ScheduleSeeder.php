@@ -15,28 +15,28 @@ use Illuminate\Database\Seeder;
 class ScheduleSeeder extends Seeder
 {
     public function run(): void
-{
-    $doctors = Doctor::all();
-    $total   = 0;
+    {
+        $doctors = Doctor::all();
+        $total   = 0;
 
-    $dayNames = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        foreach ($doctors as $doctor) {
+            // Pilih 3 hari acak dari 7 hari (0=Senin … 6=Minggu)
+           $days = collect(['monday','tuesday','wednesday','thursday','friday','saturday','sunday'])
+            ->shuffle()->take(3);
 
-    foreach ($doctors as $doctor) {
-        // Pilih 3 hari acak dari 7 hari
-        $days = collect($dayNames)->shuffle()->take(3);
-
-        foreach ($days as $day) {
-            Schedule::firstOrCreate(
-                ['doctor_id' => $doctor->id, 'day_of_week' => $day],
-                Schedule::factory()->make([
-                    'doctor_id'   => $doctor->id,
-                    'day_of_week' => $day,
-                ])->toArray()
-            );
-            $total++;
+            foreach ($days as $day) {
+                Schedule::firstOrCreate(
+                    // Unik: 1 dokter hanya boleh 1 jadwal per hari
+                    ['doctor_id' => $doctor->id, 'day_of_week' => $day],
+                    Schedule::factory()->make([
+                        'doctor_id'  => $doctor->id,
+                        'day_of_week' => $day,
+                    ])->toArray()
+                );
+                $total++;
+            }
         }
-    }
 
-    $this->command->info("✅ ScheduleSeeder selesai: {$total} jadwal dibuat.");
-}
+        $this->command->info("✅ ScheduleSeeder selesai: {$total} jadwal dibuat.");
+    }
 }

@@ -22,51 +22,39 @@ use Illuminate\Database\Seeder;
 class AppointmentSeeder extends Seeder
 {
     public function run(): void
-    {
-        $doctors  = Doctor::with('schedules')->get();
-        $patients = Patient::all();
+{
+    $doctors  = Doctor::with('schedules')->get();
+    $patients = Patient::all();
 
-        // Kalau belum ada dokter/pasien → hentikan dengan pesan error
-        if ($doctors->isEmpty() || $patients->isEmpty()) {
-            $this->command->error('❌ Jalankan UserSeeder, DoctorSeeder, PatientSeeder dulu!');
-            return;
-        }
-
-        $appointmentCount  = 0;
-        $medicalRecordCount = 0;
-
-        for ($i = 0; $i < 200; $i++) {
-            // Pilih dokter & pasien secara acak
-            $doctor  = $doctors->random();
-            $patient = $patients->random();
-
-            // Dokter harus punya jadwal
-            if ($doctor->schedules->isEmpty()) {
-                continue;
-            }
-
-            $schedule = $doctor->schedules->random();
-
-            // Buat appointment dengan AppointmentFactory
-            $appointment = Appointment::factory()->create([
-                'doctor_id'   => $doctor->id,
-                'patient_id'  => $patient->id,
-                'schedule_id' => $schedule->id,
-            ]);
-
-            $appointmentCount++;
-
-            // ── Buat rekam medis untuk appointment 'completed' ──────────
-            // Target 100 rekam medis → buat selama belum mencapai 100
-            if ($appointment->status === 'completed' && $medicalRecordCount < 100) {
-                MedicalRecord::factory()->create([
-                    'appointment_id' => $appointment->id,
-                    'doctor_id'      => $doctor->id,
-                ]);
-                $medicalRecordCount++;
-            }
-        }
-
-        $this->command->info("✅ AppointmentSeeder selesai: {$appointmentCount} appointments, {$medicalRecordCount} rekam medis.");
+    if ($doctors->isEmpty() || $patients->isEmpty()) {
+        $this->command->error('❌ Jalankan UserSeeder, DoctorSeeder, PatientSeeder dulu!');
+        return;
     }
+
+    $faker = \Faker\Factory::create('id_ID');
+
+    // Status pool untuk sisa appointment (setelah 100 completed)
+    $statusPool = ['pending', 'pending', 'confirmed', 'confirmed', 'cancelled'];
+
+    for ($i = 0; $i < 200; $i++) {
+        $doctor  = $doctors->random();
+        $patient = $patients->random();
+
+        if ($doctor->schedules->isEmpty()) continue;
+
+        $schedule = $doctor->schedules->random();
+
+        // 100 pertama → PAKSA completed, sisanya → acak
+        $status = $i < 100 ? 'completed' : $faker->randomElement($statusPool);
+
+        Appointment::factory()->create([
+            'doctor_id'   => $doctor->id,
+            'patient_id'  => $patient->id,
+            'schedule_id' => $schedule->id,
+            'status'      => $status,
+        ]);
+    }
+
+    $this->command->info("✅ AppointmentSeeder selesai: 200 appointments (100 completed, 100 lainnya acak).");
+}
 }
